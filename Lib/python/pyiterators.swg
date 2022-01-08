@@ -11,11 +11,8 @@
 
 %include <std_common.i>
 
-%fragment("SwigPyIterator","header",fragment="<stddef.h>") {
+%fragment("SwigPyIterator","header",fragment="<stddef.h>","header",fragment="<stdexcept>") {
 namespace swig {
-  struct stop_iteration {
-  };
-
   struct SwigPyIterator {
   private:
     SwigPtr_PyObject _seq;
@@ -37,7 +34,7 @@ namespace swig {
     // Backward iterator method, very common in C++, but not required in Python
     virtual SwigPyIterator *decr(size_t /*n*/ = 1)
     {
-      throw stop_iteration();
+      throw std::runtime_error("Stop Iteration");
     }
 
     // Random access iterator methods, but not required in Python
@@ -276,7 +273,7 @@ namespace swig {
     
     PyObject *value() const {
       if (base::current == end) {
-	throw stop_iteration();
+	throw std::runtime_error("Stop Iteration");
       } else {
 	return from(static_cast<const value_type&>(*(base::current)));
       }
@@ -291,7 +288,7 @@ namespace swig {
     {
       while (n--) {
 	if (base::current == end) {
-	  throw stop_iteration();
+	  throw std::runtime_error("Stop Iteration");
 	} else {
 	  ++base::current;
 	}
@@ -326,7 +323,7 @@ namespace swig {
     {
       while (n--) {
 	if (base::current == base0::begin) {
-	  throw stop_iteration();
+	  throw std::runtime_error("Stop Iteration");
 	} else {
 	  --base::current;
 	}
@@ -374,10 +371,7 @@ namespace swig
   /*
     Throw a StopIteration exception
   */
-  %ignore stop_iteration;
-  struct stop_iteration {};
-  
-  %typemap(throws) stop_iteration {
+  %typemap(throws) std::runtime_error {
     (void)$1;
     SWIG_SetErrorObj(PyExc_StopIteration, SWIG_Py_Void());
     SWIG_fail;
@@ -402,19 +396,19 @@ namespace swig
   }
 #endif
 
-  %catches(swig::stop_iteration) SwigPyIterator::value() const;
-  %catches(swig::stop_iteration) SwigPyIterator::incr(size_t n = 1);
-  %catches(swig::stop_iteration) SwigPyIterator::decr(size_t n = 1);
+  %catches(std::runtime_error) SwigPyIterator::value() const;
+  %catches(std::runtime_error) SwigPyIterator::incr(size_t n = 1);
+  %catches(std::runtime_error) SwigPyIterator::decr(size_t n = 1);
   %catches(std::invalid_argument) SwigPyIterator::distance(const SwigPyIterator &x) const;
   %catches(std::invalid_argument) SwigPyIterator::equal (const SwigPyIterator &x) const;
-  %catches(swig::stop_iteration) SwigPyIterator::__next__();
-  %catches(swig::stop_iteration) SwigPyIterator::next();
-  %catches(swig::stop_iteration) SwigPyIterator::previous();
-  %catches(swig::stop_iteration) SwigPyIterator::advance(ptrdiff_t n);
-  %catches(swig::stop_iteration) SwigPyIterator::operator += (ptrdiff_t n);
-  %catches(swig::stop_iteration) SwigPyIterator::operator -= (ptrdiff_t n);
-  %catches(swig::stop_iteration) SwigPyIterator::operator + (ptrdiff_t n) const;
-  %catches(swig::stop_iteration) SwigPyIterator::operator - (ptrdiff_t n) const;
+  %catches(std::runtime_error) SwigPyIterator::__next__();
+  %catches(std::runtime_error) SwigPyIterator::next();
+  %catches(std::runtime_error) SwigPyIterator::previous();
+  %catches(std::runtime_error) SwigPyIterator::advance(ptrdiff_t n);
+  %catches(std::runtime_error) SwigPyIterator::operator += (ptrdiff_t n);
+  %catches(std::runtime_error) SwigPyIterator::operator -= (ptrdiff_t n);
+  %catches(std::runtime_error) SwigPyIterator::operator + (ptrdiff_t n) const;
+  %catches(std::runtime_error) SwigPyIterator::operator - (ptrdiff_t n) const;
 
   struct SwigPyIterator
   {
